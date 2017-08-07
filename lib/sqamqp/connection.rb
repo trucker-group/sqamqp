@@ -2,26 +2,31 @@ require 'bunny'
 
 module Sqamqp
   module Connection
-    AMQP_CONNECTION_PARAMS = {
-      host: ENV['AMQP_HOST'] || '127.0.0.1',
-      port: ENV['AMQP_PORT'] || 5672,
-      user:  ENV['AMQP_USER'] || 'guest',
-      password: ENV['AMQP_PASSWORD'] || 'guest',
-      pool: ENV['AMQP_POOL'] || 10
-    }
+    def self.connection_params
+      @connection_params ||= {
+        host: ENV['AMQP_HOST'] || '127.0.0.1',
+        port: ENV['AMQP_PORT'] || 5672,
+        user:  ENV['AMQP_USER'] || 'guest',
+        password: ENV['AMQP_PASSWORD'] || 'guest',
+        vhost: ENV['AMQP_VHOST'] || '/',
+        pool: ENV['AMQP_POOL'] || 10
+      }
+    end
 
     def self.establish_connection
-      @@current_connection = Bunny.new(AMQP_CONNECTION_PARAMS).tap do |c|
+      @@current_connection = Bunny.new(connection_params).tap do |c|
         c.start
       end
 
-      @@channel_pool = ConnectionPool.new(size: AMQP_CONNECTION_PARAMS[:pool]) do
+      @@channel_pool = ConnectionPool.new(size: connection_params[:pool]) do
         @@current_connection.create_channel
       end
     end
 
     def self.connection_string
-      "amqp://#{AMQP_CONNECTION_PARAMS[:user]}:#{AMQP_CONNECTION_PARAMS[:password]}@#{AMQP_CONNECTION_PARAMS[:host]}:#{AMQP_CONNECTION_PARAMS[:port]}"
+      string = "amqp://#{connection_params[:user]}:#{connection_params[:password]}@#{connection_params[:host]}:#{connection_params[:port]}"
+      string << "/" + connection_params[:vhost] if connection_params[:vhost] && connection_params[:vhost] != '/'
+      string
     end
 
     def self.current_connection
