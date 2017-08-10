@@ -1,39 +1,82 @@
 # Sqamqp
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/sqamqp`. To experiment with that code, run `bin/console` for an interactive prompt.
+sqamqp это gem, который содержит набор логики для работы приложения с amqp (RabbitMQ)
 
-TODO: Delete this and the text above, and describe your gem
+в качестве клиента amqp используется [bunny](https://github.com/ruby-amqp/bunny)
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'sqamqp'
+gem 'sqamqp', git: 'ssh://git@gitlab2.sqtools.ru:10022/sqerp/sqamqp.git'
 ```
 
 And then execute:
 
     $ bundle
 
-Or install it yourself as:
-
-    $ gem install sqamqp
-
 ## Usage
 
-TODO: Write usage instructions here
+### настройки коннекта к amqp
 
-## Development
+в .env проекта разместить переменные с настройками подключения: 
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+```
+AMQP_HOST=192.168.1.1
+AMQP_USER=stage
+AMQP_PASSWORD=stage
+AMQP_VHOST=vhost
+AMQP_POOL=10
+```
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+Если этого не сделать, то будут использованы значения по умолчанию, подходящие для локально настроенного сервера amqp без использования virtual_host
 
-## Contributing
+### строка подключения в формате amqp:
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/sqamqp.
+```
+Sqamqp::Connection.connection_string #=> 'amqp://stage:stage@192.1681.1/vhost'
+```
 
-## License
 
-The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
+###  Публикация сообщений: 
+
+Для соедидения с свервером amqp нужно сделать вызов: 
+
+```
+Sqamqp::Connection.establish_connection
+```
+
+Можно вызывать этот метод перед каждой публикацией, а можно один раз при инициализации приложения.
+
+Модуль  `Sqamqp::Publisher` содержит базу для публикации сообщений. Сейчас поддерживаются персистентные топик сообщения (`persistent: true, routing_key: 'route'`)
+
+Пример использования: 
+
+```
+Sqamqp::Connection.establish_connection
+
+class MyPublihser
+  include Sqamqp::Publisher
+
+  attr_reader :employee, :event
+
+  EXCHANGE = :employee_events
+
+  def initialize(employee, event)
+    @employee = employee
+    @event = "employee.#{event}"
+  end
+
+  def configure_channel(channel)
+    channel.topic(EXCHANGE, durable: true)
+  end
+
+  def payload
+    { id: employee.id, first_name: employee.first_name }
+  end
+end
+
+MyPublihser.new(employee).publish
+```
+
