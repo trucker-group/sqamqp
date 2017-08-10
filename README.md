@@ -1,6 +1,6 @@
 # Sqamqp
 
-sqamqp это gem, который содержит набор логики для работы приложения с amqp (RabbitMQ)
+sqamqp это gem, который содержит набор логики для работы приложения с amqp (RabbitMQ) 
 
 в качестве клиента amqp используется [bunny](https://github.com/ruby-amqp/bunny)
 
@@ -34,16 +34,16 @@ AMQP_POOL=10
 
 ### строка подключения в формате amqp:
 
-```
+```ruby
 Sqamqp::Connection.connection_string #=> 'amqp://stage:stage@192.1681.1/vhost'
 ```
 
 
 ###  Публикация сообщений: 
 
-Для соедидения с свервером amqp нужно сделать вызов: 
+Для соединения с сервером amqp нужно сделать вызов: 
 
-```
+```ruby
 Sqamqp::Connection.establish_connection
 ```
 
@@ -53,7 +53,7 @@ Sqamqp::Connection.establish_connection
 
 Пример использования: 
 
-```
+```ruby
 Sqamqp::Connection.establish_connection
 
 class MyPublihser
