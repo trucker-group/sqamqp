@@ -35,7 +35,7 @@ AMQP_POOL=10
 ### строка подключения в формате amqp:
 
 ```ruby
-Sqamqp::Connection.connection_string #=> 'amqp://stage:stage@192.1681.1/vhost'
+Sqamqp::Connection.connection_string #=> 'amqp://stage:stage@192.168.1.1/vhost'
 ```
 
 
