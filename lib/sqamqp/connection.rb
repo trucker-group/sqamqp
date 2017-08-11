@@ -13,10 +13,12 @@ module Sqamqp
       }
     end
 
-    def self.establish_connection
-      @@current_connection = Bunny.new(connection_params).tap do |c|
-        c.start
-      end
+    def self.establish_connection(connection = nil)
+      @@current_connection = if connection
+        connection
+      else
+        Bunny.new(connection_params).start
+       end
 
       @@channel_pool = ConnectionPool.new(size: connection_params[:pool]) do
         @@current_connection.create_channel
