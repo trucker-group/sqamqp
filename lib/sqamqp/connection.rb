@@ -17,7 +17,9 @@ module Sqamqp
       @@current_connection = if connection
         connection
       else
-        Bunny.new(connection_params).start
+        config = Sqamqp::Config.new
+        yield(config)
+        Bunny.new(connection_params, config.options).start
        end
 
       @@channel_pool = ConnectionPool.new(size: connection_params[:pool]) do
