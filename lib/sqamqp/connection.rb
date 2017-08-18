@@ -19,7 +19,7 @@ module Sqamqp
         connection
       else
         config = Sqamqp::Config.new
-        yield(config)
+        yield(config) if block_given?
         Bunny.new(connection_params, config.options).start
        end
 
