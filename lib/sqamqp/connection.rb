@@ -1,4 +1,5 @@
 require 'bunny'
+require 'dotenv/load'
 
 module Sqamqp
   module Connection
