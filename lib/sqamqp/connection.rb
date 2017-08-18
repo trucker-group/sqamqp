@@ -25,6 +25,8 @@ module Sqamqp
       @@channel_pool = ConnectionPool.new(size: connection_params[:pool]) do
         @@current_connection.create_channel
       end
+
+      @@current_connection
     end
 
     def self.connection_string
