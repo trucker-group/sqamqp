@@ -25,8 +25,11 @@ RSpec.describe Sqamqp::Publisher do
   end
 
   context "on publish" do
+    before do
+     Sqamqp::Connection.class_variable_set(:@@current_connection, nil)
+    end
 
-    let(:session) { instance_double("Bunny::Session", create_channel: true)}
+    let(:session) { double("Bunny::Session", create_channel: true) }
     let(:bunny) { double("Bunny", start: session) }
 
     it 'creates a new connection if it was not created before' do
