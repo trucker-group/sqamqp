@@ -1,7 +1,12 @@
 require 'bunny'
+require 'connection_pool'
 
 module Sqamqp
   module Connection
+    @@current_connection = nil
+    @@channel_pool = nil
+    @@config ||= Sqamqp::Config.new
+
     def self.connection_params
       @connection_params ||= {
         host: ENV['AMQP_HOST'] || '127.0.0.1',
@@ -17,7 +22,6 @@ module Sqamqp
       @@current_connection = if connection
         connection
       else
-        config = Sqamqp::Config.new
         yield(config) if block_given?
         Bunny.new(connection_params, config.options).start
        end
@@ -41,6 +45,11 @@ module Sqamqp
 
     def self.channel_pool
       @@channel_pool
+    end
+
+    def self.config
+      yield(@@config) if block_given?
+      @@config
     end
   end
 end
