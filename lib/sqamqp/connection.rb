@@ -25,11 +25,6 @@ module Sqamqp
         yield(config) if block_given?
         Bunny.new(connection_params, config.options).start
        end
-
-      @@channel_pool = ConnectionPool.new(size: connection_params[:pool]) do
-        @@current_connection.create_channel
-      end
-
       @@current_connection
     end
 
@@ -40,11 +35,13 @@ module Sqamqp
     end
 
     def self.current_connection
-      @@current_connection
+      establish_connection(@@current_connection)
     end
 
     def self.channel_pool
-      @@channel_pool
+      @@channel_pool ||= ConnectionPool.new(size: connection_params[:pool]) do
+        current_connection.create_channel
+      end
     end
 
     def self.config

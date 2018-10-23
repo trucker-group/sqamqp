@@ -32,11 +32,6 @@ RSpec.describe Sqamqp::Publisher do
     let(:session) { double("Bunny::Session", create_channel: true) }
     let(:bunny) { double("Bunny", start: session) }
 
-    it 'creates a new connection if it was not created before' do
-      expect(Bunny).to receive(:new).and_return(bunny)
-      expect { MockPublisher.new.publish }.to change { Sqamqp::Connection.current_connection }.from(nil).to(session)
-    end
-
     it 'uses the connection created before' do
       expect(Bunny).to receive(:new).and_return(bunny)
       expect(Sqamqp::Connection.establish_connection).to eq(session)
